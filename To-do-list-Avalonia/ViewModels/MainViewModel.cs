@@ -3,14 +3,17 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using To_do_list_Avalonia.Models;
 using To_do_list_Avalonia.Infrastructure;
+using To_do_list_Avalonia.Services;
 using System.Linq;
 using System;
+using System.Threading.Tasks;
 
 namespace To_do_list_Avalonia.ViewModels;
 
 public class MainViewModel : INotifyPropertyChanged
 {
     private string _newTitle = string.Empty;
+    private readonly TodoDataService _dataService;
 
     public ObservableCollection<TodoItem> Items { get; } = new();
 
@@ -37,7 +40,7 @@ public class MainViewModel : INotifyPropertyChanged
             var pending = total - completed;
             
             if (total == 0) return "No tasks yet";
-            if (completed == total) return $"All done! ?? ({total} tasks completed)";
+            if (completed == total) return $"All done! ({total} tasks completed)";
             
             return $"{pending} pending • {completed} completed • {total} total";
         }
@@ -52,6 +55,8 @@ public class MainViewModel : INotifyPropertyChanged
 
     public MainViewModel()
     {
+        _dataService = new TodoDataService();
+        
         AddCommand = new RelayCommand(_ => Add(), _ => !string.IsNullOrWhiteSpace(NewTitle));
         RemoveCommand = new RelayCommand(item => Remove(item as TodoItem));
         ClearCompletedCommand = new RelayCommand(_ => ClearCompleted(), _ => Items.Any(i => i.IsCompleted));
@@ -59,34 +64,50 @@ public class MainViewModel : INotifyPropertyChanged
         SaveEditCommand = new RelayCommand(item => SaveEdit(item as TodoItem));
         CancelEditCommand = new RelayCommand(item => CancelEdit(item as TodoItem));
 
-        Items.CollectionChanged += (_, _) => 
+        Items.CollectionChanged += async (_, _) => 
         { 
             OnPropertyChanged(nameof(Summary)); 
-            ClearCompletedCommand.RaiseCanExecuteChanged(); 
+            ClearCompletedCommand.RaiseCanExecuteChanged();
+            await SaveDataAsync();
         };
 
-        // Add some sample data for demonstration
-        LoadSampleData();
+        // Load existing data when the view model is created
+        _ = LoadDataAsync();
     }
 
-    private void LoadSampleData()
+    private async Task LoadDataAsync()
     {
-        var sampleItems = new[]
+        try
         {
-            new TodoItem { Title = "Review quarterly goals", CreatedAt = DateTime.Now.AddHours(-2) },
-            new TodoItem { Title = "Prepare presentation slides", CreatedAt = DateTime.Now.AddHours(-1) },
-            new TodoItem { Title = "Schedule team meeting", IsCompleted = true, CreatedAt = DateTime.Now.AddMinutes(-30) },
-            new TodoItem { Title = "Update project documentation", CreatedAt = DateTime.Now.AddMinutes(-15) }
-        };
-
-        foreach (var item in sampleItems)
+            var savedTodos = await _dataService.LoadTodosAsync();
+            
+            // Clear existing items and add loaded ones
+            Items.Clear();
+            foreach (var item in savedTodos)
+            {
+                item.PropertyChanged += OnItemPropertyChanged;
+                Items.Add(item);
+            }
+        }
+        catch (Exception ex)
         {
-            item.PropertyChanged += OnItemPropertyChanged;
-            Items.Add(item);
+            Console.WriteLine($"Error loading data: {ex.Message}");
         }
     }
 
-    private void Add()
+    public async Task SaveDataAsync()
+    {
+        try
+        {
+            await _dataService.SaveTodosAsync(Items);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error saving data: {ex.Message}");
+        }
+    }
+
+    private async void Add()
     {
         if (string.IsNullOrWhiteSpace(NewTitle)) return;
         
@@ -95,17 +116,19 @@ public class MainViewModel : INotifyPropertyChanged
         Items.Insert(0, newItem); // Add to top for better UX
         NewTitle = string.Empty;
         OnPropertyChanged(nameof(Summary));
+        // Save is triggered by Items.CollectionChanged event
     }
 
-    private void Remove(TodoItem? item)
+    private async void Remove(TodoItem? item)
     {
         if (item == null) return;
         item.PropertyChanged -= OnItemPropertyChanged;
         Items.Remove(item);
         OnPropertyChanged(nameof(Summary));
+        // Save is triggered by Items.CollectionChanged event
     }
 
-    private void ClearCompleted()
+    private async void ClearCompleted()
     {
         var completed = Items.Where(i => i.IsCompleted).ToList();
         foreach (var item in completed)
@@ -114,9 +137,10 @@ public class MainViewModel : INotifyPropertyChanged
             Items.Remove(item);
         }
         OnPropertyChanged(nameof(Summary));
+        // Save is triggered by Items.CollectionChanged event
     }
 
-    private void StartEdit(TodoItem? item)
+    private async void StartEdit(TodoItem? item)
     {
         if (item == null) return;
         
@@ -131,7 +155,7 @@ public class MainViewModel : INotifyPropertyChanged
         item.IsEditing = true;
     }
 
-    private void SaveEdit(TodoItem? item)
+    private async void SaveEdit(TodoItem? item)
     {
         if (item == null || !item.IsEditing) return;
         
@@ -143,6 +167,9 @@ public class MainViewModel : INotifyPropertyChanged
         
         item.IsEditing = false;
         item.EditTitle = string.Empty;
+        
+        // Save after editing
+        await SaveDataAsync();
     }
 
     private void CancelEdit(TodoItem? item)
@@ -153,12 +180,15 @@ public class MainViewModel : INotifyPropertyChanged
         item.EditTitle = string.Empty;
     }
 
-    private void OnItemPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    private async void OnItemPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(TodoItem.IsCompleted))
         {
             OnPropertyChanged(nameof(Summary));
             ClearCompletedCommand.RaiseCanExecuteChanged();
+            
+            // Save when completion status changes
+            await SaveDataAsync();
         }
     }
 
