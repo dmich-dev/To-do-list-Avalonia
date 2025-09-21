@@ -1,0 +1,344 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:To_do_list_Avalonia.ViewModels"
+        xmlns:m="clr-namespace:To_do_list_Avalonia.Models"
+        x:DataType="vm:MainViewModel"
+        mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="700"
+        x:Class="To_do_list_Avalonia.MainWindow"
+        Title="My Todo List"
+        Width="1000" Height="700"
+        MinWidth="600" MinHeight="500"
+        WindowStartupLocation="CenterScreen">
+  
+  <Window.Resources>
+    <!-- Gradient Brushes -->
+    <LinearGradientBrush x:Key="HeaderGradient" StartPoint="0,0" EndPoint="1,1">
+      <GradientStop Color="#667eea" Offset="0"/>
+      <GradientStop Color="#764ba2" Offset="1"/>
+    </LinearGradientBrush>
+    
+    <LinearGradientBrush x:Key="AddButtonGradient" StartPoint="0,0" EndPoint="0,1">
+      <GradientStop Color="#48CAE4" Offset="0"/>
+      <GradientStop Color="#0077B6" Offset="1"/>
+    </LinearGradientBrush>
+    
+    <SolidColorBrush x:Key="CardBackground" Color="#FFFFFF"/>
+  </Window.Resources>
+
+  <Window.Styles>
+    <!-- Modern Input Styling -->
+    <Style Selector="TextBox.modern-input">
+      <Setter Property="CornerRadius" Value="12"/>
+      <Setter Property="BorderThickness" Value="2"/>
+      <Setter Property="BorderBrush" Value="#E2E8F0"/>
+      <Setter Property="Padding" Value="16,12"/>
+      <Setter Property="FontSize" Value="16"/>
+      <Setter Property="Background" Value="White"/>
+    </Style>
+    
+    <Style Selector="TextBox.modern-input:focus">
+      <Setter Property="BorderBrush" Value="#4299E1"/>
+      <Setter Property="BorderThickness" Value="2"/>
+    </Style>
+    
+    <Style Selector="TextBox.modern-input:pointerover">
+      <Setter Property="BorderBrush" Value="#CBD5E0"/>
+    </Style>
+
+    <!-- Watermark Styling - Only affects the placeholder text -->
+    <Style Selector="TextBox.modern-input /template/ TextBlock#PART_Watermark">
+      <Setter Property="Foreground" Value="Black"/>
+      <Setter Property="Opacity" Value="0.7"/>
+    </Style>
+
+    <!-- Edit TextBox Styling -->
+    <Style Selector="TextBox.edit-input">
+      <Setter Property="CornerRadius" Value="8"/>
+      <Setter Property="BorderThickness" Value="2"/>
+      <Setter Property="BorderBrush" Value="#4299E1"/>
+      <Setter Property="Padding" Value="8,6"/>
+      <Setter Property="FontSize" Value="16"/>
+      <Setter Property="Background" Value="White"/>
+      <Setter Property="FontWeight" Value="Medium"/>
+    </Style>
+
+    <!-- Modern Button Styling -->
+    <Style Selector="Button.add-button">
+      <Setter Property="CornerRadius" Value="12"/>
+      <Setter Property="Padding" Value="20,12"/>
+      <Setter Property="Margin" Value="12,0,0,0"/>
+      <Setter Property="Background" Value="{StaticResource AddButtonGradient}"/>
+      <Setter Property="Foreground" Value="White"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="FontSize" Value="16"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    
+    <Style Selector="Button.add-button:pointerover">
+      <Setter Property="Background" Value="#0366D6"/>
+    </Style>
+
+    <!-- Action Button Styling -->
+    <Style Selector="Button.action-btn">
+      <Setter Property="Width" Value="36"/>
+      <Setter Property="Height" Value="36"/>
+      <Setter Property="CornerRadius" Value="18"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="FontSize" Value="16"/>
+      <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    
+    <Style Selector="Button.edit-btn">
+      <Setter Property="Background" Value="#BEE3F8"/>
+      <Setter Property="Foreground" Value="#2B6CB0"/>
+    </Style>
+    
+    <Style Selector="Button.delete-btn">
+      <Setter Property="Background" Value="#FED7D7"/>
+      <Setter Property="Foreground" Value="#E53E3E"/>
+    </Style>
+
+    <!-- Save/Cancel Button Styling -->
+    <Style Selector="Button.save-btn">
+      <Setter Property="Background" Value="#C6F6D5"/>
+      <Setter Property="Foreground" Value="#276749"/>
+    </Style>
+
+    <Style Selector="Button.cancel-btn">
+      <Setter Property="Background" Value="#FED7D7"/>
+      <Setter Property="Foreground" Value="#E53E3E"/>
+    </Style>
+    
+    <Style Selector="Button.edit-btn:pointerover">
+      <Setter Property="Background" Value="#90CDF4"/>
+    </Style>
+    
+    <Style Selector="Button.delete-btn:pointerover">
+      <Setter Property="Background" Value="#FEB2B2"/>
+    </Style>
+
+    <Style Selector="Button.save-btn:pointerover">
+      <Setter Property="Background" Value="#9AE6B4"/>
+    </Style>
+
+    <Style Selector="Button.cancel-btn:pointerover">
+      <Setter Property="Background" Value="#FEB2B2"/>
+    </Style>
+
+    <!-- Modern ListBox -->
+    <Style Selector="ListBox.modern-list">
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="Padding" Value="0"/>
+    </Style>
+
+    <!-- Todo Item Card -->
+    <Style Selector="Border.todo-card">
+      <Setter Property="CornerRadius" Value="16"/>
+      <Setter Property="Padding" Value="20"/>
+      <Setter Property="Background" Value="{StaticResource CardBackground}"/>
+      <Setter Property="BorderBrush" Value="#E2E8F0"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="Margin" Value="0,0,0,16"/>
+    </Style>
+    
+    <Style Selector="Border.todo-card:pointerover">
+      <Setter Property="Background" Value="#F7FAFC"/>
+      <Setter Property="BorderBrush" Value="#CBD5E0"/>
+    </Style>
+
+    <!-- Completed Task Styling -->
+    <Style Selector="Border.completed">
+      <Setter Property="Opacity" Value="0.7"/>
+      <Setter Property="Background" Value="#F0FFF4"/>
+    </Style>
+
+    <!-- Task Title Styling -->
+    <Style Selector="TextBlock.task-title">
+      <Setter Property="FontSize" Value="18"/>
+      <Setter Property="FontWeight" Value="Medium"/>
+      <Setter Property="Foreground" Value="#2D3748"/>
+    </Style>
+    
+    <Style Selector="TextBlock.task-title.completed">
+      <Setter Property="TextDecorations" Value="Strikethrough"/>
+      <Setter Property="Foreground" Value="#718096"/>
+    </Style>
+
+    <!-- Status Bar -->
+    <Style Selector="Border.status-bar">
+      <Setter Property="Background">
+        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+          <GradientStop Color="#F7FAFC" Offset="0"/>
+          <GradientStop Color="#EDF2F7" Offset="1"/>
+        </LinearGradientBrush>
+      </Setter>
+      <Setter Property="BorderBrush" Value="#E2E8F0"/>
+      <Setter Property="BorderThickness" Value="0,1,0,0"/>
+    </Style>
+
+    <!-- Clear Button -->
+    <Style Selector="Button.clear-button">
+      <Setter Property="Background" Value="#F56565"/>
+      <Setter Property="Foreground" Value="White"/>
+      <Setter Property="CornerRadius" Value="8"/>
+      <Setter Property="Padding" Value="16,8"/>
+      <Setter Property="FontWeight" Value="Medium"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    
+    <Style Selector="Button.clear-button:pointerover">
+      <Setter Property="Background" Value="#E53E3E"/>
+    </Style>
+
+    <!-- Empty State -->
+    <Style Selector="StackPanel.empty-state">
+      <Setter Property="HorizontalAlignment" Value="Center"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+  </Window.Styles>
+
+  <Grid RowDefinitions="Auto,Auto,*,Auto" Background="#F8FAFC">
+    <!-- Header with Gradient -->
+    <Border Grid.Row="0" Background="{StaticResource HeaderGradient}" CornerRadius="0,0,24,24" Padding="32,24">
+      <StackPanel>
+        <TextBlock Text="✨ My Tasks" FontSize="32" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/>
+        <TextBlock Text="Stay organized and productive" FontSize="16" Foreground="#E2E8F0" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+      </StackPanel>
+    </Border>
+
+    <!-- Enhanced Input Section -->
+    <Border Grid.Row="1" Margin="32,24,32,16" CornerRadius="16" Background="White" Padding="24" 
+            BorderBrush="#E2E8F0" BorderThickness="1">
+      <DockPanel>
+        <Button Classes="add-button" Content="➕ Add Task" Command="{Binding AddCommand}" DockPanel.Dock="Right"/>
+        <TextBox Classes="modern-input" 
+                 Watermark="What needs to be done today? ✏️" 
+                 Text="{Binding NewTitle}"
+                 FontSize="16"/>
+      </DockPanel>
+    </Border>
+
+    <!-- Enhanced Task List -->
+    <ScrollViewer Grid.Row="2" Margin="32,0,32,16" Padding="0,0,8,0">
+      <Panel>
+        <!-- Task List -->
+        <ListBox Classes="modern-list" ItemsSource="{Binding Items}" IsVisible="{Binding Items.Count}">
+          <ListBox.ItemTemplate>
+            <DataTemplate x:DataType="m:TodoItem">
+              <Border Classes="todo-card" Classes.completed="{Binding IsCompleted}">
+                <Grid ColumnDefinitions="Auto,*,Auto" VerticalAlignment="Center">
+                  <!-- Modern Checkbox -->
+                  <CheckBox Classes="modern-check" 
+                           IsChecked="{Binding IsCompleted}" 
+                           VerticalAlignment="Center"
+                           Margin="0,0,16,0"/>
+                  
+                  <!-- Task Content -->
+                  <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <!-- Normal View -->
+                    <StackPanel IsVisible="{Binding !IsEditing}">
+                      <TextBlock Classes="task-title" 
+                               Classes.completed="{Binding IsCompleted}"
+                               Text="{Binding Title}"/>
+                      
+                      <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                        <TextBlock Text="📅" FontSize="12" Margin="0,0,4,0"/>
+                        <TextBlock Text="{Binding CreatedAt, StringFormat='{}{0:MMM dd, yyyy} at {0:HH:mm}'}" 
+                                 FontSize="12" 
+                                 Foreground="#718096"/>
+                      </StackPanel>
+                    </StackPanel>
+                    
+                    <!-- Edit View -->
+                    <StackPanel IsVisible="{Binding IsEditing}" Margin="0,4">
+                      <TextBox Classes="edit-input"
+                               Text="{Binding EditTitle}"
+                               Watermark="Enter task title..."
+                               Margin="0,0,0,8"/>
+                      
+                      <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                        <TextBlock Text="📅" FontSize="12" Margin="0,0,4,0"/>
+                        <TextBlock Text="{Binding CreatedAt, StringFormat='{}{0:MMM dd, yyyy} at {0:HH:mm}'}" 
+                                 FontSize="12" 
+                                 Foreground="#718096"/>
+                      </StackPanel>
+                    </StackPanel>
+                  </StackPanel>
+                  
+                  <!-- Action Buttons -->
+                  <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+                    <!-- Normal Action Buttons -->
+                    <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding !IsEditing}">
+                      <Button Classes="action-btn edit-btn" 
+                              Content="✏️"
+                              Command="{Binding $parent[Window].DataContext.StartEditCommand}" 
+                              CommandParameter="{Binding}"
+                              ToolTip.Tip="Edit task"/>
+                      
+                      <Button Classes="action-btn delete-btn" 
+                              Content="🗑️"
+                              Command="{Binding $parent[Window].DataContext.RemoveCommand}" 
+                              CommandParameter="{Binding}"
+                              ToolTip.Tip="Delete task"/>
+                    </StackPanel>
+                    
+                    <!-- Edit Action Buttons -->
+                    <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding IsEditing}">
+                      <Button Classes="action-btn save-btn" 
+                              Content="✅"
+                              Command="{Binding $parent[Window].DataContext.SaveEditCommand}" 
+                              CommandParameter="{Binding}"
+                              ToolTip.Tip="Save changes"/>
+                      
+                      <Button Classes="action-btn cancel-btn" 
+                              Content="❌"
+                              Command="{Binding $parent[Window].DataContext.CancelEditCommand}" 
+                              CommandParameter="{Binding}"
+                              ToolTip.Tip="Cancel editing"/>
+                    </StackPanel>
+                  </StackPanel>
+                </Grid>
+              </Border>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+
+        <!-- Empty State -->
+        <StackPanel Classes="empty-state" IsVisible="{Binding !Items.Count}">
+          <TextBlock Text="📝" FontSize="64" HorizontalAlignment="Center" Margin="0,0,0,16"/>
+          <TextBlock Text="No tasks yet!" FontSize="24" FontWeight="SemiBold" Foreground="#2D3748" HorizontalAlignment="Center"/>
+          <TextBlock Text="Add your first task above to get started" FontSize="16" Foreground="#718096" HorizontalAlignment="Center" Margin="0,8,0,0"/>
+        </StackPanel>
+      </Panel>
+    </ScrollViewer>
+
+    <!-- Enhanced Status Footer -->
+    <Border Grid.Row="3" Classes="status-bar" Padding="32,16" CornerRadius="24,24,0,0">
+      <Grid ColumnDefinitions="*,Auto">
+        <!-- Summary Statistics -->
+        <StackPanel Orientation="Horizontal" Spacing="24">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <TextBlock Text="📊" FontSize="16"/>
+            <TextBlock Text="{Binding Summary}" FontSize="14" FontWeight="Medium" Foreground="#2D3748"/>
+          </StackPanel>
+          
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <TextBlock Text="⚡" FontSize="16"/>
+            <TextBlock Text="Keep up the great work!" FontSize="14" Foreground="#718096"/>
+          </StackPanel>
+        </StackPanel>
+        
+        <!-- Action Button -->
+        <Button Grid.Column="1" 
+                Classes="clear-button"
+                Content="🧹 Clear Completed" 
+                Command="{Binding ClearCompletedCommand}"/>
+      </Grid>
+    </Border>
+  </Grid>
+</Window>
