@@ -7,6 +7,7 @@ using To_do_list_Avalonia.Services;
 using System.Linq;
 using System;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace To_do_list_Avalonia.ViewModels;
 
@@ -14,8 +15,11 @@ public class MainViewModel : INotifyPropertyChanged
 {
     private string _newTitle = string.Empty;
     private readonly TodoDataService _dataService;
+    private readonly StickyNoteDataService _stickyNoteDataService;
+    private readonly Dictionary<Guid, StickyNoteViewModel> _activeStickyNotes = new();
 
     public ObservableCollection<TodoItem> Items { get; } = new();
+    public ObservableCollection<StickyNote> StickyNotes { get; } = new();
 
     public string NewTitle
     {
@@ -52,10 +56,12 @@ public class MainViewModel : INotifyPropertyChanged
     public RelayCommand StartEditCommand { get; }
     public RelayCommand SaveEditCommand { get; }
     public RelayCommand CancelEditCommand { get; }
+    public RelayCommand CreateStickyNoteCommand { get; }
 
     public MainViewModel()
     {
         _dataService = new TodoDataService();
+        _stickyNoteDataService = new StickyNoteDataService();
         
         AddCommand = new RelayCommand(_ => Add(), _ => !string.IsNullOrWhiteSpace(NewTitle));
         RemoveCommand = new RelayCommand(item => Remove(item as TodoItem));
@@ -63,6 +69,7 @@ public class MainViewModel : INotifyPropertyChanged
         StartEditCommand = new RelayCommand(item => StartEdit(item as TodoItem));
         SaveEditCommand = new RelayCommand(item => SaveEdit(item as TodoItem));
         CancelEditCommand = new RelayCommand(item => CancelEdit(item as TodoItem));
+        CreateStickyNoteCommand = new RelayCommand(_ => CreateStickyNote());
 
         Items.CollectionChanged += async (_, _) => 
         { 
@@ -71,8 +78,14 @@ public class MainViewModel : INotifyPropertyChanged
             await SaveDataAsync();
         };
 
+        StickyNotes.CollectionChanged += async (_, _) =>
+        {
+            await SaveStickyNotesAsync();
+        };
+
         // Load existing data when the view model is created
         _ = LoadDataAsync();
+        _ = LoadStickyNotesAsync();
     }
 
     private async Task LoadDataAsync()
@@ -107,7 +120,46 @@ public class MainViewModel : INotifyPropertyChanged
         }
     }
 
-    private async void Add()
+    private async Task LoadStickyNotesAsync()
+    {
+        try
+        {
+            var savedNotes = await _stickyNoteDataService.LoadNotesAsync();
+            
+            StickyNotes.Clear();
+            foreach (var note in savedNotes)
+            {
+                note.PropertyChanged += OnStickyNotePropertyChanged;
+                StickyNotes.Add(note);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading sticky notes: {ex.Message}");
+        }
+    }
+
+    public async Task SaveStickyNotesAsync()
+    {
+        try
+        {
+            await _stickyNoteDataService.SaveNotesAsync(StickyNotes);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error saving sticky notes: {ex.Message}");
+        }
+    }
+
+    private void CreateStickyNote()
+    {
+        var note = new StickyNote();
+        note.PropertyChanged += OnStickyNotePropertyChanged;
+        StickyNotes.Add(note);
+        OnStickyNoteCreated?.Invoke(this, note);
+    }
+
+    private void Add()
     {
         if (string.IsNullOrWhiteSpace(NewTitle)) return;
         
@@ -119,7 +171,7 @@ public class MainViewModel : INotifyPropertyChanged
         // Save is triggered by Items.CollectionChanged event
     }
 
-    private async void Remove(TodoItem? item)
+    private void Remove(TodoItem? item)
     {
         if (item == null) return;
         item.PropertyChanged -= OnItemPropertyChanged;
@@ -128,7 +180,7 @@ public class MainViewModel : INotifyPropertyChanged
         // Save is triggered by Items.CollectionChanged event
     }
 
-    private async void ClearCompleted()
+    private void ClearCompleted()
     {
         var completed = Items.Where(i => i.IsCompleted).ToList();
         foreach (var item in completed)
@@ -140,7 +192,7 @@ public class MainViewModel : INotifyPropertyChanged
         // Save is triggered by Items.CollectionChanged event
     }
 
-    private async void StartEdit(TodoItem? item)
+    private void StartEdit(TodoItem? item)
     {
         if (item == null) return;
         
@@ -191,6 +243,31 @@ public class MainViewModel : INotifyPropertyChanged
             await SaveDataAsync();
         }
     }
+
+    public void CloseStickyNote(StickyNoteViewModel viewModel)
+    {
+        var note = StickyNotes.FirstOrDefault(n => n.Id == viewModel.Id);
+        if (note != null)
+        {
+            note.PropertyChanged -= OnStickyNotePropertyChanged;
+            StickyNotes.Remove(note);
+        }
+        
+        _activeStickyNotes.Remove(viewModel.Id);
+    }
+
+    public void RegisterStickyNoteViewModel(StickyNoteViewModel viewModel)
+    {
+        _activeStickyNotes[viewModel.Id] = viewModel;
+    }
+
+    private void OnStickyNotePropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        // Auto-save when sticky note properties change
+        _ = SaveStickyNotesAsync();
+    }
+
+    public event EventHandler<StickyNote>? OnStickyNoteCreated;
 
     public event PropertyChangedEventHandler? PropertyChanged;
     protected void OnPropertyChanged([CallerMemberName] string? name = null) 

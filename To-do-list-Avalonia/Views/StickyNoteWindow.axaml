@@ -1,0 +1,157 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:To_do_list_Avalonia.ViewModels"
+        x:DataType="vm:StickyNoteViewModel"
+        mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="300"
+        x:Class="To_do_list_Avalonia.Views.StickyNoteWindow"
+        Title="Sticky Note"
+        Width="300" Height="300"
+        MinWidth="200" MinHeight="200"
+        MaxWidth="600" MaxHeight="600"
+        CanResize="True"
+        SystemDecorations="None"
+        TransparencyLevelHint="Transparent"
+        Background="Transparent"
+        ExtendClientAreaToDecorationsHint="True"
+        Topmost="True">
+
+  <Window.Styles>
+    <!-- Sticky Note Container -->
+    <Style Selector="Border.sticky-container">
+      <Setter Property="CornerRadius" Value="8"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="BorderBrush" Value="#00000040"/>
+    </Style>
+
+    <!-- Header Bar -->
+    <Style Selector="Border.header-bar">
+      <Setter Property="CornerRadius" Value="8,8,0,0"/>
+      <Setter Property="Padding" Value="8"/>
+      <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+
+    <!-- Color Button -->
+    <Style Selector="Button.color-btn">
+      <Setter Property="Width" Value="24"/>
+      <Setter Property="Height" Value="24"/>
+      <Setter Property="CornerRadius" Value="12"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="BorderBrush" Value="#00000030"/>
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+
+    <Style Selector="Button.color-btn:pointerover">
+      <Setter Property="BorderBrush" Value="#00000060"/>
+      <Setter Property="BorderThickness" Value="2"/>
+    </Style>
+
+    <!-- Close Button -->
+    <Style Selector="Button.close-btn">
+      <Setter Property="Width" Value="24"/>
+      <Setter Property="Height" Value="24"/>
+      <Setter Property="CornerRadius" Value="12"/>
+      <Setter Property="Background" Value="#FF6B6B"/>
+      <Setter Property="Foreground" Value="White"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="Padding" Value="6"/>
+      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="FontWeight" Value="Bold"/>
+	    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+		<Setter Property="VerticalContentAlignment" Value="Center"/>
+      <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+
+    <Style Selector="Button.close-btn:pointerover">
+      <Setter Property="Background" Value="#EE5A52"/>
+    </Style>
+
+    <!-- Content TextBox -->
+    <Style Selector="TextBox.note-content">
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="Padding" Value="12"/>
+      <Setter Property="FontSize" Value="14"/>
+      <Setter Property="TextWrapping" Value="Wrap"/>
+      <Setter Property="AcceptsReturn" Value="True"/>
+      <Setter Property="VerticalAlignment" Value="Stretch"/>
+    </Style>
+
+    <Style Selector="TextBox.note-content /template/ TextBlock#PART_Watermark">
+      <Setter Property="Foreground" Value="#00000060"/>
+    </Style>
+  </Window.Styles>
+
+  <Border Classes="sticky-container" Background="{Binding Color}">
+    <Grid RowDefinitions="Auto,*,Auto">
+      <!-- Header with drag handle and controls -->
+      <Border Grid.Row="0" 
+              Classes="header-bar"
+              Background="#00000015"
+              PointerPressed="HeaderBar_PointerPressed"
+              PointerMoved="HeaderBar_PointerMoved"
+              PointerReleased="HeaderBar_PointerReleased">
+        <Grid ColumnDefinitions="*,Auto">
+          <!-- Color Palette -->
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <Button Classes="color-btn" 
+                    Background="#FFF9C4" 
+                    Command="{Binding ChangeColorCommand}"
+                    CommandParameter="#FFF9C4"
+                    ToolTip.Tip="Yellow"/>
+            <Button Classes="color-btn" 
+                    Background="#FFCCBC" 
+                    Command="{Binding ChangeColorCommand}"
+                    CommandParameter="#FFCCBC"
+                    ToolTip.Tip="Orange"/>
+            <Button Classes="color-btn" 
+                    Background="#F8BBD0" 
+                    Command="{Binding ChangeColorCommand}"
+                    CommandParameter="#F8BBD0"
+                    ToolTip.Tip="Pink"/>
+            <Button Classes="color-btn" 
+                    Background="#E1BEE7" 
+                    Command="{Binding ChangeColorCommand}"
+                    CommandParameter="#E1BEE7"
+                    ToolTip.Tip="Purple"/>
+            <Button Classes="color-btn" 
+                    Background="#BBDEFB" 
+                    Command="{Binding ChangeColorCommand}"
+                    CommandParameter="#BBDEFB"
+                    ToolTip.Tip="Blue"/>
+            <Button Classes="color-btn" 
+                    Background="#C8E6C9" 
+                    Command="{Binding ChangeColorCommand}"
+                    CommandParameter="#C8E6C9"
+                    ToolTip.Tip="Green"/>
+          </StackPanel>
+
+          <!-- Close Button -->
+          <Button Grid.Column="1" 
+                  Classes="close-btn"
+                  Content="X"
+                  Command="{Binding CloseCommand}"
+                  ToolTip.Tip="Close sticky note"/>
+        </Grid>
+      </Border>
+
+      <!-- Note Content -->
+      <TextBox Grid.Row="1"
+               Classes="note-content"
+               Text="{Binding Content}"
+               Watermark="Type your note here..."
+               TextChanged="Content_TextChanged"/>
+      
+      <!-- Save Status Indicator -->
+      <TextBlock Grid.Row="2"
+       Text="{Binding SaveStatus}"
+        FontSize="10"
+                 Foreground="#00000080"
+                 Padding="8,4"
+                 HorizontalAlignment="Right"
+                 VerticalAlignment="Bottom"/>
+    </Grid>
+  </Border>
+</Window>

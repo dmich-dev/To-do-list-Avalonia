@@ -200,14 +200,68 @@
       <Setter Property="HorizontalAlignment" Value="Center"/>
       <Setter Property="VerticalAlignment" Value="Center"/>
     </Style>
+
+    <!-- Drag Handle Styling -->
+    <Style Selector="Border.drag-handle">
+      <Setter Property="Width" Value="32"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+    
+    <Style Selector="Border.drag-handle:pointerover">
+      <Setter Property="Background" Value="#E2E8F0"/>
+    </Style>
+    
+    <Style Selector="TextBlock.drag-icon">
+      <Setter Property="FontSize" Value="16"/>
+      <Setter Property="Foreground" Value="#A0AEC0"/>
+    </Style>
+    
+    <!-- Dragging State -->
+    <Style Selector="Border.todo-card.dragging">
+      <Setter Property="Opacity" Value="0.5"/>
+      <Setter Property="BorderBrush" Value="#4299E1"/>
+      <Setter Property="BorderThickness" Value="2"/>
+    </Style>
+    
+    <!-- Drop Target Indicator -->
+    <Style Selector="Border.todo-card.drop-target">
+      <Setter Property="BorderBrush" Value="#48BB78"/>
+      <Setter Property="BorderThickness" Value="3"/>
+      <Setter Property="Background" Value="#F0FFF4"/>
+    </Style>
   </Window.Styles>
 
   <Grid RowDefinitions="Auto,Auto,*,Auto" Background="#F8FAFC">
     <!-- Header with Gradient -->
     <Border Grid.Row="0" Background="{StaticResource HeaderGradient}" CornerRadius="0,0,24,24" Padding="32,24">
       <StackPanel>
-        <TextBlock Text="✨ My Tasks" FontSize="32" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/>
-        <TextBlock Text="Stay organized and productive" FontSize="16" Foreground="#E2E8F0" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+        <Grid ColumnDefinitions="*,Auto">
+          <StackPanel Grid.Column="0" VerticalAlignment="Center">
+            <TextBlock Text="✨ My Tasks" FontSize="32" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/>
+            <TextBlock Text="Stay organized and productive" FontSize="16" Foreground="#E2E8F0" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+          </StackPanel>
+          
+          <!-- Sticky Note Button -->
+          <Button Grid.Column="1"
+                  Content="📝 New Sticky Note"
+                  Command="{Binding CreateStickyNoteCommand}"
+                  Background="#FFD93D"
+                  Foreground="#2D3748"
+                  CornerRadius="12"
+                  Padding="16,10"
+                  FontWeight="SemiBold"
+                  BorderThickness="0"
+                  Cursor="Hand"
+                  VerticalAlignment="Center"
+                  ToolTip.Tip="Create a new sticky note">
+            <Button.Styles>
+              <Style Selector="Button:pointerover">
+                <Setter Property="Background" Value="#FFC700"/>
+              </Style>
+            </Button.Styles>
+          </Button>
+        </Grid>
       </StackPanel>
     </Border>
 
@@ -227,19 +281,42 @@
     <ScrollViewer Grid.Row="2" Margin="32,0,32,16" Padding="0,0,8,0">
       <Panel>
         <!-- Task List -->
-        <ListBox Classes="modern-list" ItemsSource="{Binding Items}" IsVisible="{Binding Items.Count}">
+        <ListBox x:Name="TaskListBox" 
+                 Classes="modern-list" 
+                 ItemsSource="{Binding Items}" 
+                 IsVisible="{Binding Items.Count}">
           <ListBox.ItemTemplate>
             <DataTemplate x:DataType="m:TodoItem">
-              <Border Classes="todo-card" Classes.completed="{Binding IsCompleted}">
-                <Grid ColumnDefinitions="Auto,*,Auto" VerticalAlignment="Center">
+              <Border Classes="todo-card" 
+                      Classes.completed="{Binding IsCompleted}"
+                      DragDrop.AllowDrop="True"
+                      PointerPressed="Task_PointerPressed"
+                      PointerMoved="Task_PointerMoved"
+                      PointerReleased="Task_PointerReleased"
+                      DragDrop.DragOver="Task_DragOver"
+                      DragDrop.Drop="Task_Drop"
+                      DragDrop.DragLeave="Task_DragLeave">
+                <Grid ColumnDefinitions="Auto,Auto,*,Auto" VerticalAlignment="Center">
+                  <!-- Drag Handle -->
+                  <Border Grid.Column="0" 
+                          Classes="drag-handle"
+                          Margin="0,0,8,0"
+                          ToolTip.Tip="Drag to reorder">
+                    <TextBlock Classes="drag-icon" 
+                               Text="⋮⋮" 
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                  </Border>
+                  
                   <!-- Modern Checkbox -->
-                  <CheckBox Classes="modern-check" 
+                  <CheckBox Grid.Column="1"
+                           Classes="modern-check" 
                            IsChecked="{Binding IsCompleted}" 
                            VerticalAlignment="Center"
                            Margin="0,0,16,0"/>
                   
                   <!-- Task Content -->
-                  <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                  <StackPanel Grid.Column="2" VerticalAlignment="Center">
                     <!-- Normal View -->
                     <StackPanel IsVisible="{Binding !IsEditing}">
                       <TextBlock Classes="task-title" 
@@ -271,7 +348,7 @@
                   </StackPanel>
                   
                   <!-- Action Buttons -->
-                  <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+                  <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="8">
                     <!-- Normal Action Buttons -->
                     <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding !IsEditing}">
                       <Button Classes="action-btn edit-btn" 
@@ -281,7 +358,7 @@
                               ToolTip.Tip="Edit task"/>
                       
                       <Button Classes="action-btn delete-btn" 
-                              Content="🗑️"
+                              Content="🚮"
                               Command="{Binding $parent[Window].DataContext.RemoveCommand}" 
                               CommandParameter="{Binding}"
                               ToolTip.Tip="Delete task"/>
