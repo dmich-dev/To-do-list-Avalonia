@@ -7,6 +7,8 @@ using To_do_list_Avalonia.Views;
 using To_do_list_Avalonia.Models;
 using System.Collections.Generic;
 using System.Linq;
+using Avalonia.Styling;
+using System.ComponentModel;
 
 namespace To_do_list_Avalonia
 {
@@ -24,6 +26,9 @@ namespace To_do_list_Avalonia
             var viewModel = new MainViewModel();
             DataContext = viewModel;
 
+            // Subscribe to property changes to handle theme switching
+            viewModel.PropertyChanged += ViewModel_PropertyChanged;
+
             // Subscribe to sticky note creation event
             viewModel.OnStickyNoteCreated += OnStickyNoteCreated;
 
@@ -31,6 +36,21 @@ namespace To_do_list_Avalonia
             foreach (var note in viewModel.StickyNotes)
             {
                 OpenStickyNote(viewModel, note);
+            }
+        }
+
+        private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(MainViewModel.IsDarkMode) && sender is MainViewModel vm)
+            {
+                // Switch theme
+                RequestedThemeVariant = vm.IsDarkMode ? ThemeVariant.Dark : ThemeVariant.Light;
+                
+                // Update Application theme as well
+                if (Application.Current is not null)
+                {
+                    Application.Current.RequestedThemeVariant = vm.IsDarkMode ? ThemeVariant.Dark : ThemeVariant.Light;
+                }
             }
         }
 

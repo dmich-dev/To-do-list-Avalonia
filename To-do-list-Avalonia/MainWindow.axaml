@@ -4,6 +4,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:To_do_list_Avalonia.ViewModels"
         xmlns:m="clr-namespace:To_do_list_Avalonia.Models"
+        xmlns:converters="clr-namespace:To_do_list_Avalonia.Converters"
         x:DataType="vm:MainViewModel"
         mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="700"
         x:Class="To_do_list_Avalonia.MainWindow"
@@ -13,6 +14,10 @@
         WindowStartupLocation="CenterScreen">
   
   <Window.Resources>
+    <!-- Converters -->
+    <converters:DarkModeIconConverter x:Key="DarkModeIconConverter"/>
+    <converters:DarkModeTextConverter x:Key="DarkModeTextConverter"/>
+    
     <!-- Gradient Brushes -->
     <LinearGradientBrush x:Key="HeaderGradient" StartPoint="0,0" EndPoint="1,1">
       <GradientStop Color="#667eea" Offset="0"/>
@@ -236,14 +241,38 @@
     <!-- Header with Gradient -->
     <Border Grid.Row="0" Background="{StaticResource HeaderGradient}" CornerRadius="0,0,24,24" Padding="32,24">
       <StackPanel>
-        <Grid ColumnDefinitions="*,Auto">
-          <StackPanel Grid.Column="0" VerticalAlignment="Center">
+        <Grid ColumnDefinitions="Auto,*,Auto">
+          <!-- Dark Mode Toggle Button -->
+          <Button Grid.Column="0"
+                  Command="{Binding ToggleDarkModeCommand}"
+                  Background="#4A5568"
+                  Foreground="White"
+                  CornerRadius="12"
+                  Padding="12,10"
+                  FontWeight="SemiBold"
+                  BorderThickness="0"
+                  Cursor="Hand"
+                  VerticalAlignment="Center"
+                  Margin="0,0,16,0"
+                  ToolTip.Tip="Toggle Dark Mode">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <TextBlock Text="{Binding IsDarkMode, Converter={StaticResource DarkModeIconConverter}}"/>
+              <TextBlock Text="{Binding IsDarkMode, Converter={StaticResource DarkModeTextConverter}}"/>
+            </StackPanel>
+            <Button.Styles>
+              <Style Selector="Button:pointerover">
+                <Setter Property="Background" Value="#2D3748"/>
+              </Style>
+            </Button.Styles>
+          </Button>
+          
+          <StackPanel Grid.Column="1" VerticalAlignment="Center">
             <TextBlock Text="✨ My Tasks" FontSize="32" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/>
             <TextBlock Text="Stay organized and productive" FontSize="16" Foreground="#E2E8F0" HorizontalAlignment="Center" Margin="0,4,0,0"/>
           </StackPanel>
           
           <!-- Sticky Note Button -->
-          <Button Grid.Column="1"
+          <Button Grid.Column="2"
                   Content="📝 New Sticky Note"
                   Command="{Binding CreateStickyNoteCommand}"
                   Background="#FFD93D"

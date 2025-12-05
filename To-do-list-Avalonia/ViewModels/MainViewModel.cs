@@ -27,6 +27,7 @@ public class MainViewModel : INotifyPropertyChanged
     private readonly TodoDataService _dataService;
     private readonly StickyNoteDataService _stickyNoteDataService;
     private readonly Dictionary<Guid, StickyNoteViewModel> _activeStickyNotes = new();
+    private bool _isDarkMode = false;
 
     public ObservableCollection<TodoItem> Items { get; } = new();
     public ObservableCollection<StickyNote> StickyNotes { get; } = new();
@@ -41,6 +42,19 @@ public class MainViewModel : INotifyPropertyChanged
                 _newTitle = value;
                 OnPropertyChanged();
                 AddCommand.RaiseCanExecuteChanged();
+            }
+        }
+    }
+
+    public bool IsDarkMode
+    {
+        get => _isDarkMode;
+        set
+        {
+            if (_isDarkMode != value)
+            {
+                _isDarkMode = value;
+                OnPropertyChanged();
             }
         }
     }
@@ -67,6 +81,7 @@ public class MainViewModel : INotifyPropertyChanged
     public RelayCommand SaveEditCommand { get; }
     public RelayCommand CancelEditCommand { get; }
     public RelayCommand CreateStickyNoteCommand { get; }
+    public RelayCommand ToggleDarkModeCommand { get; }
 
     public MainViewModel()
     {
@@ -80,6 +95,7 @@ public class MainViewModel : INotifyPropertyChanged
         SaveEditCommand = new RelayCommand(item => SaveEdit(item as TodoItem));
         CancelEditCommand = new RelayCommand(item => CancelEdit(item as TodoItem));
         CreateStickyNoteCommand = new RelayCommand(_ => CreateStickyNote());
+        ToggleDarkModeCommand = new RelayCommand(_ => ToggleDarkMode());
 
         Items.CollectionChanged += async (_, _) => 
         { 
@@ -244,7 +260,7 @@ public class MainViewModel : INotifyPropertyChanged
 
     private async void OnItemPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(TodoItem.IsCompleted))
+    if (e.PropertyName == nameof(TodoItem.IsCompleted))
         {
             OnPropertyChanged(nameof(Summary));
             ClearCompletedCommand.RaiseCanExecuteChanged();
@@ -252,6 +268,11 @@ public class MainViewModel : INotifyPropertyChanged
             // Save when completion status changes
             await SaveDataAsync();
         }
+    }
+
+    private void ToggleDarkMode()
+    {
+        IsDarkMode = !IsDarkMode;
     }
 
     public void CloseStickyNote(StickyNoteViewModel viewModel)
