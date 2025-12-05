@@ -8,6 +8,12 @@ using To_do_list_Avalonia.Infrastructure;
 
 namespace To_do_list_Avalonia.ViewModels;
 
+/// <summary>
+/// ViewModel for individual sticky notes.
+/// Implements auto-save functionality with debouncing.
+/// Follows MVVM pattern and Single Responsibility Principle.
+/// Manages the UI state and user interactions for a single sticky note.
+/// </summary>
 public class StickyNoteViewModel : INotifyPropertyChanged
 {
     private readonly StickyNote _note;

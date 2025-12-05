@@ -7,7 +7,11 @@ using To_do_list_Avalonia.Models;
 
 namespace To_do_list_Avalonia.Services;
 
-public class TodoDataService
+/// <summary>
+/// Service for persisting TodoItem data to JSON files.
+/// Implements Single Responsibility Principle (SOLID) - only handles todo data persistence.
+/// </summary>
+public class TodoDataService : IDataService<TodoItem>
 {
     private readonly string _dataFilePath;
 
@@ -20,7 +24,10 @@ public class TodoDataService
         _dataFilePath = Path.Combine(appFolder, "todos.json");
     }
 
-    public async Task<List<TodoItem>> LoadTodosAsync()
+    /// <summary>
+    /// Loads todo items from persistent storage.
+    /// </summary>
+    public async Task<List<TodoItem>> LoadAsync()
     {
         try
         {
@@ -41,7 +48,10 @@ public class TodoDataService
         }
     }
 
-    public async Task SaveTodosAsync(IEnumerable<TodoItem> todos)
+    /// <summary>
+    /// Saves todo items to persistent storage.
+    /// </summary>
+    public async Task SaveAsync(IEnumerable<TodoItem> todos)
     {
         try
         {
@@ -57,4 +67,8 @@ public class TodoDataService
             Console.WriteLine($"Error saving todos: {ex.Message}");
         }
     }
+
+    // Legacy method names for backward compatibility
+    public Task<List<TodoItem>> LoadTodosAsync() => LoadAsync();
+    public Task SaveTodosAsync(IEnumerable<TodoItem> todos) => SaveAsync(todos);
 }

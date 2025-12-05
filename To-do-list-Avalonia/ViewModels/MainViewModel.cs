@@ -11,6 +11,16 @@ using System.Collections.Generic;
 
 namespace To_do_list_Avalonia.ViewModels;
 
+/// <summary>
+/// Main ViewModel for the Todo List application.
+/// Follows MVVM pattern (Model-View-ViewModel).
+/// SOLID Principles applied:
+/// - Single Responsibility: Manages todo items and sticky notes state
+/// - Open/Closed: Can be extended via inheritance
+/// - Liskov Substitution: Implements INotifyPropertyChanged properly
+/// - Interface Segregation: Uses focused interfaces (IDataService)
+/// - Dependency Inversion: Depends on abstractions (services)
+/// </summary>
 public class MainViewModel : INotifyPropertyChanged
 {
     private string _newTitle = string.Empty;

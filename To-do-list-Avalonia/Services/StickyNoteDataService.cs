@@ -8,7 +8,11 @@ using To_do_list_Avalonia.Models;
 
 namespace To_do_list_Avalonia.Services;
 
-public class StickyNoteDataService
+/// <summary>
+/// Service for persisting StickyNote data to JSON files.
+/// Implements Single Responsibility Principle (SOLID) - only handles sticky note data persistence.
+/// </summary>
+public class StickyNoteDataService : IDataService<StickyNote>
 {
     private readonly string _dataFilePath;
 
@@ -23,7 +27,10 @@ public class StickyNoteDataService
         _dataFilePath = Path.Combine(appDataFolder, "stickynotes.json");
     }
 
-    public async Task<List<StickyNote>> LoadNotesAsync()
+    /// <summary>
+    /// Loads sticky notes from persistent storage.
+    /// </summary>
+    public async Task<List<StickyNote>> LoadAsync()
     {
         try
         {
@@ -43,7 +50,10 @@ public class StickyNoteDataService
         }
     }
 
-    public async Task SaveNotesAsync(IEnumerable<StickyNote> notes)
+    /// <summary>
+    /// Saves sticky notes to persistent storage.
+    /// </summary>
+    public async Task SaveAsync(IEnumerable<StickyNote> notes)
     {
         try
         {
@@ -60,4 +70,8 @@ public class StickyNoteDataService
             Console.WriteLine($"Error saving sticky notes: {ex.Message}");
         }
     }
+
+    // Legacy method names for backward compatibility
+    public Task<List<StickyNote>> LoadNotesAsync() => LoadAsync();
+    public Task SaveNotesAsync(IEnumerable<StickyNote> notes) => SaveAsync(notes);
 }

@@ -4,6 +4,12 @@ using System.Runtime.CompilerServices;
 
 namespace To_do_list_Avalonia.Models;
 
+/// <summary>
+/// Represents a sticky note in the application.
+/// Supports customizable position, size, color, and content.
+/// Implements INotifyPropertyChanged for data binding support.
+/// Follows Single Responsibility Principle - only handles sticky note data.
+/// </summary>
 public class StickyNote : INotifyPropertyChanged
 {
     private string _content = string.Empty;

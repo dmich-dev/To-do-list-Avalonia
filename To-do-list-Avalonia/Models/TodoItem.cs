@@ -4,6 +4,11 @@ using System.Runtime.CompilerServices;
 
 namespace To_do_list_Avalonia.Models;
 
+/// <summary>
+/// Represents a single todo item in the application.
+/// Implements INotifyPropertyChanged for data binding support.
+/// Follows Single Responsibility Principle - only handles todo item data.
+/// </summary>
 public class TodoItem : INotifyPropertyChanged
 {
     private string _title = string.Empty;
